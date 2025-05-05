@@ -1,6 +1,6 @@
 ﻿flask==2.3.3
 aiohttp
-python-weather==1.0.5
+python-weather
 SpeechRecognition==3.10.0
 pyttsx3==2.90
 
