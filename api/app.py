@@ -1,6 +1,11 @@
+import sys
+import os
+
+# Add parent directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask, request, jsonify, render_template
 from main import processCommand
-from flask_cors import CORS
 import asyncio
 from Weather import WeatherFetcher
 import logging
@@ -9,8 +14,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS if frontend is separate
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 weather_fetcher = WeatherFetcher()
 
 
