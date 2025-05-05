@@ -2,16 +2,17 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import musicLibrary
-import requests
 import sys
-from google import genai
+import asyncio
 from gemenai import Gemenai
 from news import NewsSpeaker
-from newsdataapi import NewsDataApiClient
+from Weather import WeatherFetcher
+
 
 recognizer = sr.Recognizer()
 engine = pyttsx3.init()
 newsapi = "pub_7718740c4bb47ca5e0f8c705a798cf2f1a3f2"
+weather_fetcher = WeatherFetcher()
 
 
 def speak(text):
@@ -42,52 +43,75 @@ def listen():
             return None
 
 
+async def get_weather_response(city):
+    """Get weather response for a city."""
+    return await weather_fetcher.get_weather(city)
+
+
 def processCommand(c):
     if "open youtube" in c.lower():
         webbrowser.open("https://youtube.com")
+        return "Opening YouTube..."
     elif "open google" in c.lower():
         webbrowser.open("https://google.co.in")
+        return "Opening Google..."
     elif c.lower().startswith("play"):
         song = c.lower().split(" ", 1)[1]
         link = musicLibrary.music.get(song)
         if link:
             webbrowser.open(link)
+            return f"Playing {song}..."
         else:
-            speak(f"Sorry, I couldn't find {song} in the library.")
+            return f"Sorry, I couldn't find {song} in the library."
     elif "news" in c.lower():
         try:
             news_speaker = NewsSpeaker(newsapi)
-            news_speaker.read_news()
-            print("All news has been read. Do you need anything else?")
-            speak("All news has been read. Do you need anything else?")
-            # Wait for user response after news
-            response = listen()
-            if response:
-                processCommand(response)
+            articles = news_speaker.fetch_news()
+            if articles:
+                # Format the news response for the web interface
+                response = "📰 Latest News Headlines:\n\n"
+                for i, article in enumerate(articles, 1):
+                    title = article.get('title', 'No Title Available')
+                    response += f"{i}. {title}\n"
+                return response
             else:
-                print("No response received. Returning to wake word detection.")
+                return "Sorry, I couldn't fetch the news at the moment."
         except Exception as e:
-            speak("Error fetching news.")
-            print("Error fetching news:", e)
-    elif c.lower() in ["stop", "exit", "goodbye"]:
-        speak("Goodbye! Have a great day!")
-        sys.exit()
+            return f"Error fetching news: {str(e)}"
+    elif "weather" in c.lower():
+        try:
+            # Extract city name from command
+            city = c.lower().replace("weather", "").replace("in", "").strip()
+            if not city:
+                return "Please specify a city. For example: 'weather in London'"
+            
+            # Run the async weather function
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            response = loop.run_until_complete(get_weather_response(city))
+            loop.close()
+            return response
+        except Exception as e:
+            return f"Error fetching weather: {str(e)}"
+    elif c.lower() in ["stop", "exit", "goodbye","close"]:
+        return "Goodbye! Have a great day!"
     else:
         output = aiProcess(c)
-        print(output)
-        speak(output)
+        return output
 
 
 if __name__ == "__main__":
-    speak("Initializing Jarvis...")
+    speak("Initializing SAGE...")
     
     while True:
-        print("Waiting for wake word 'Jarvis'...")
+        print("Waiting for wake word 'SAGE'...")
         wake_word = listen()
 
-        if wake_word == "jarvis":
-            speak("Jarvis activated. How can I assist?")
+        if wake_word == "SAGE":
+            speak("SAGE activated. How can I assist?")
             command = listen()
             if command:
                 print(f"Recognized Command: {command}")
-                processCommand(command)
+                response = processCommand(command)
+                print(response)
+                speak(response)

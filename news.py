@@ -1,20 +1,8 @@
 import requests
-import pyttsx3
-import time
 
 class NewsSpeaker:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.engine = pyttsx3.init()
-
-    def speak(self, text):
-        """Queue a line of text to be spoken."""
-        try:
-            self.engine.say(text)
-            self.engine.runAndWait()
-            time.sleep(1)  # Add a small pause between articles
-        except Exception as e:
-            print(f"Error speaking: {e}")
 
     def fetch_news(self):
         """Fetch news articles using the newsdata.io API."""
@@ -24,14 +12,11 @@ class NewsSpeaker:
         )
         try:
             response = requests.get(url)
-            print("Status Code:", response.status_code)
-
             if response.status_code == 200:
                 data = response.json()
                 articles = data.get("results", [])
                 return articles[:5]  # Limit to 5 articles for better experience
             else:
-                print(f"Failed to fetch headlines. HTTP Status Code: {response.status_code}")
                 return []
         except Exception as e:
             print(f"Error fetching news: {e}")
