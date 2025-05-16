@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JARVIS</title>
+  <meta name="description" content="JARVIS - AI-Powered Voice Assistant" />
+  <meta name="keywords" content="AI, Voice Assistant, JARVIS, SAGE" />
+  <title>JARVIS - AI Assistant</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
   <div class="chat-container">
@@ -28,7 +31,10 @@
       </button>
     </div>
     <div class="chat-box" id="chat-box">
-      <!-- Messages will appear here -->
+      <!-- Welcome message -->
+      <div class="message bot">
+        Hello! I'm SAGE, your AI assistant. How can I help you today?
+      </div>
     </div>
     <div class="chat-input-area">
       <input type="text" id="user-input" placeholder="Type your message or click the mic to speak..." />

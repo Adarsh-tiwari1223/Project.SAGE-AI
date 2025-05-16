@@ -2,11 +2,11 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import musicLibrary
-import sys
 import asyncio
 from gemenai import Gemenai
 from news import NewsSpeaker
 from Weather import WeatherFetcher
+import wave
 
 
 recognizer = sr.Recognizer()
@@ -34,13 +34,28 @@ def listen():
         recognizer.adjust_for_ambient_noise(source)  # Reduce noise
         print("Listening...")
         try:
+            # Using WAV format instead of AIFF
             audio = recognizer.listen(source, timeout=4, phrase_time_limit=3)
+            # Save audio to WAV file temporarily
+            with wave.open('temp_audio.wav', 'wb') as wav_file:
+                wav_file.setnchannels(1)
+                wav_file.setsampwidth(2)
+                wav_file.setframerate(44100)
+                wav_file.writeframes(audio.get_wav_data())
             return recognizer.recognize_google(audio).lower()
         except sr.UnknownValueError:
             return None
         except sr.RequestError:
             speak("I'm having trouble connecting to the voice service.")
             return None
+        finally:
+            # Clean up temporary file
+            try:
+                import os
+                if os.path.exists('temp_audio.wav'):
+                    os.remove('temp_audio.wav')
+            except:
+                pass
 
 
 async def get_weather_response(city):
