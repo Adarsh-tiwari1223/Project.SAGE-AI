@@ -1,6 +1,4 @@
-import speech_recognition as sr
 import webbrowser
-import pyttsx3
 import api.musicLibrary as musicLibrary
 import asyncio
 import os
@@ -15,37 +13,12 @@ try:
 except Exception as e:
     print(f"Warning: Could not load .env file: {e}")
 
-recognizer = sr.Recognizer()
-engine = pyttsx3.init()
 weather_fetcher = WeatherFetcher()
-
-
-def speak(text):
-    engine.say(text)
-    try:
-        engine.runAndWait()
-    except RuntimeError:
-        pass
 
 
 def aiProcess(command):
     g = Gemenai()
     return g.Genai(command)
-
-
-def listen():
-    """Listens for a voice command and returns it as text."""
-    with sr.Microphone() as source:
-        recognizer.adjust_for_ambient_noise(source)  # Reduce noise
-        print("Listening...")
-        try:
-            audio = recognizer.listen(source, timeout=4, phrase_time_limit=3)
-            return recognizer.recognize_google(audio).lower()
-        except sr.UnknownValueError:
-            return None
-        except sr.RequestError:
-            speak("I'm having trouble connecting to the voice service.")
-            return None
 
 
 async def get_weather_response(city):
@@ -110,17 +83,19 @@ def processCommand(c):
 
 
 if __name__ == "__main__":
-    speak("Initializing LUMEN...")
+    print("SAGE AI Assistant - Text Mode")
+    print("Type your commands (type 'exit' to quit):")
     
     while True:
-        print("Waiting for wake word 'LUMEN'...")
-        wake_word = listen()
-
-        if wake_word == "LUMEN":
-            speak("LUMEN activated. How can I assist?")
-            command = listen()
+        try:
+            command = input("SAGE: ").strip()
+            if command.lower() in ["exit", "quit", "goodbye"]:
+                print("Goodbye! Have a great day!")
+                break
+            
             if command:
-                print(f"Recognized Command: {command}")
                 response = processCommand(command)
-                print(response)
-                speak(response)
+                print(f"Response: {response}")
+        except KeyboardInterrupt:
+            print("\nGoodbye! Have a great day!")
+            break
